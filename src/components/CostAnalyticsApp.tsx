@@ -885,7 +885,7 @@ function formatDateBucket(
   const d = parseDateWithFormat(s, format);
   if (Number.isNaN(d.getTime())) {
     // If parsing failed, try simple yyyy-mm; else return raw string
-    const m2 = s.match(/^(\d{4})[-/](\dif (m2) {
+    const m2 = s.match(/^(\d{4})[-/](\d{1,2})/);
     if (m2) {
       const y = m2[1];
       const mm = m2[2].padStart(2, "0");
@@ -950,7 +950,7 @@ function parseDateWithFormat(
       Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
       Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
     };
-    const mon    const mon = months[m[2]];
+    const mon = months[m[2]];
     if (mon == null) return new Date(NaN);
     return new Date(Number(m[3]), mon, Number(m[1]));
   }
