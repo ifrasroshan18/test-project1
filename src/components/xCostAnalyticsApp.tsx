@@ -355,14 +355,14 @@ export default function CostAnalyticsApp() {
                     ))}
                   </Pie>
                   <Tooltip formatter={(v: any) => (typeof v === "number" ? v.toLocaleString(undefined, { style: "currency", currency: "USD" }) : v)} />
-                    <Legend
-                      {...({ payload: serviceLegendPayload } as any)}
-                      layout="vertical"
-                      align="right"
-                      verticalAlign="middle"
-                      wrapperStyle={{ fontSize: 12, color: "#000", maxHeight: 320, overflowY: "auto", width: 360 }}
-                      itemStyle={{ whiteSpace: "normal", textAlign: "left", fontSize: 12, color: "#000" }}
-                    />
+                  <Legend
+                    {...({ payload: serviceLegendPayload } as any)}
+                    layout="vertical"
+                    align="right"
+                    verticalAlign="middle"
+                    wrapperStyle={{ fontSize: 12, color: "#000", maxHeight: 320, overflowY: "auto", width: 360 }}
+                    itemStyle={{ whiteSpace: "normal", textAlign: "left", fontSize: 12, color: "#000" }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
               <div className="mt-2 flex space-x-2">
