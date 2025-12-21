@@ -1,6 +1,7 @@
-import NextAuth from "next-auth"
-import { authOptions } from "@/auth"
+export async function GET() {
+	return Response.json({ error: "Authentication removed" }, { status: 404 })
+}
 
-const handler = NextAuth(authOptions)
-
-export { handler as GET, handler as POST }
+export async function POST() {
+	return Response.json({ error: "Authentication removed" }, { status: 404 })
+}
