@@ -89,14 +89,22 @@ export default function CostAnalyticsApp() {
         setHeaderRow(header);
         setRawRows(rows);
 
-        // reset selections
+        // Automatically select dimensions based on specific columns
+        const autoSelectedDims: number[] = [];
+        header.forEach((col, idx) => {
+          if (col === "SubscriptionName" || col === "MeterCategory") {
+            autoSelectedDims.push(idx);
+          }
+        });
+        setSelectedDims(autoSelectedDims);
+
+        // reset other selections
         setMetricsIdxs([]);
         setPrimaryMetricIdx(null);
         setAggregation("sum");
         setDateIdx("");
         setMonthBucket(true);
         setDateFormat("auto");
-        setSelectedDims([]);
         setDimSearch("");
         setTopN(6);
         setSeriesVisible({});
