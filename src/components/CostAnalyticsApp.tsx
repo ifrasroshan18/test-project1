@@ -465,8 +465,8 @@ export default function CostAnalyticsApp() {
               <div className="bg-white rounded p-4 shadow" ref={pieRef as any}>
                 <h4 className="font-semibold mb-2">Category Breakdown ({chartMapping.pieGroupBy})</h4>
                 <ResponsiveContainer width="100%" height={300}>
-                  <PieChart margin={{ top: 0, right: 400, bottom: 0, left: 0 }}>
-                    <Pie data={byService} dataKey="cost" nameKey="service" outerRadius={80} labelLine={false} paddingAngle={2}>
+                  <PieChart>
+                    <Pie data={byService} dataKey="cost" nameKey="service" outerRadius={100} labelLine={false} paddingAngle={2}>
                       {byService.map((e, i) => (
                         <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                       ))}
