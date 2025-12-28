@@ -67,6 +67,7 @@ export default function CostAnalyticsApp() {
   // Export refs
   const lineRef = useRef<HTMLDivElement | null>(null);
   const pieRef = useRef<HTMLDivElement | null>(null);
+  const pricingPieRef = useRef<HTMLDivElement | null>(null);
   const barRef = useRef<HTMLDivElement | null>(null);
   const areaRef = useRef<HTMLDivElement | null>(null);
 
@@ -148,6 +149,7 @@ export default function CostAnalyticsApp() {
   const primaryMetricName =
     primaryMetricIdx != null && headerRow ? headerRow[primaryMetricIdx] : undefined;
   const dateName = typeof dateIdx === "number" && headerRow ? headerRow[dateIdx] : undefined;
+  const pricingModelIdx = headerRow ? headerRow.findIndex(h => h === "PricingModel") : -1;
   const dimNames = (headerRow ?? []).filter((_, idx) => selectedDims.includes(idx));
 
   /** ---------------- Filtering ---------------- */
@@ -212,6 +214,33 @@ export default function CostAnalyticsApp() {
       color: PIE_COLORS[i % PIE_COLORS.length],
     }));
   }, [pieData]);
+
+  // Pricing Model Pie
+  const pricingPieData = useMemo(() => {
+    if (!headerRow || !rawRows.length || primaryMetricIdx == null || pricingModelIdx < 0) return [];
+    const totals = new Map<string, { sum: number; count: number }>();
+    for (const row of rawRows) {
+      if (!matchesRow(row, filterRules)) continue;
+      const key = row[pricingModelIdx] || "Unknown";
+      const val = aggregation === "count" ? 1 : parseFloatSafe(row[primaryMetricIdx]);
+      const prev = totals.get(key) ?? { sum: 0, count: 0 };
+      totals.set(key, { sum: prev.sum + val, count: prev.count + 1 });
+    }
+    return Array.from(totals.entries()).map(([group, { sum, count }]) => ({
+      group,
+      value: aggregation === "sum" ? sum : aggregation === "count" ? count : count ? sum / count : 0,
+    }));
+  }, [headerRow, rawRows, primaryMetricIdx, pricingModelIdx, aggregation, filterRules]);
+
+  // Legend payload for pricing pie
+  const pricingPieLegendPayload = useMemo(() => {
+    const total = pricingPieData.reduce((s, p) => s + (Number(p.value) || 0), 0) || 1;
+    return pricingPieData.map((p, i) => ({
+      value: `${p.group} — ${Number(p.value).toLocaleString(undefined, { style: "currency", currency: "USD" })} (${((Number(p.value) / total) * 100).toFixed(1)}%)`,
+      type: "square",
+      color: PIE_COLORS[i % PIE_COLORS.length],
+    }));
+  }, [pricingPieData]);
 
   // 2) Bar: if date selected -> totals per date for PRIMARY METRIC; else -> reuse pie totals
   const barData = useMemo(() => {
@@ -760,6 +789,31 @@ export default function CostAnalyticsApp() {
                 </button>
               </div>
             </div>
+
+            {pricingPieData.length > 0 && (
+              <div className="bg-white rounded p-4 shadow" ref={pricingPieRef as any}>
+                <h4 className="font-semibold mb-2">Share by PricingModel ({primaryMetricName})</h4>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie data={pricingPieData} dataKey="value" nameKey="group" outerRadius={110} labelLine={false} paddingAngle={2}>
+                      {pricingPieData.map((_, i) => (
+                        <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(v: any) => (typeof v === "number" ? v.toLocaleString(undefined, { style: "currency", currency: "USD" }) : v)} />
+                    <Legend {...({ payload: pricingPieLegendPayload } as any)} layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ fontSize: 12, color: "#000" }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="mt-2 flex space-x-2">
+                  <button onClick={() => downloadCSV(pricingPieData, "share-by-pricing-model.csv")} className="px-3 py-1 bg-white text-black border rounded">
+                    Export CSV
+                  </button>
+                  <button onClick={() => downloadPNG(pricingPieRef, "share-pricing-model.png")} className="px-3 py-1 bg-white text-black border rounded">
+                    Export PNG
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Bar + Area */}
